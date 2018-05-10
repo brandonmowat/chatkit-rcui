@@ -21,7 +21,11 @@ export default class App extends Component {
 			onNewMessage: message => {
 				console.log(message)
         this.setState({
-          messages: [...this.state.messages, new Message({ id: 0, message: message.text })],
+          messages: [...this.state.messages, new Message({
+          	id: message.senderId === this.state.currentUsername ? 0 : message.senderId,
+          	message: message.text,
+          	senderName: message.senderId
+          })],
         })
       },
 		}
@@ -38,30 +42,25 @@ export default class App extends Component {
 		this.chatManager = new ChatManager({
 		 	instanceLocator: 'v1:us1:cb86d714-ead7-42a2-aece-f1f647c3cd2c',
 		  userId,
-		  tokenProvider: new TokenProvider({ url: 'https://us1.pusherplatform.io/services/chatkit_token_provider/v1/cb86d714-ead7-42a2-aece-f1f647c3cd2c/token' })
+		  tokenProvider: new TokenProvider({
+		  	url: 'https://us1.pusherplatform.io/services/chatkit_token_provider/v1/cb86d714-ead7-42a2-aece-f1f647c3cd2c/token'
+		  })
 		})
 
 		this.chatManager.connect()
 		  .then(currentUser => {
 		  	this.setState({ currentUser })
 
-		  	currentUser.createRoom({
-				  name: 'general',
-				  private: false,
-				}).then(room => {
+		  	currentUser.joinRoom({ roomId: 7598397 })
+				.then(room => {
 					this.setState({ room })
-				  console.log(room)
-
 					currentUser.subscribeToRoom({
 	          roomId: room.id,
 	          messageLimit: 100,
 	          hooks: this.hooks
-        })
-
+	        })
 				})
 
-
-		    console.log('Successful connection', currentUser)
 		  })
 		  .then(currentRoom => {
         this.setState({ currentRoom })
@@ -71,6 +70,7 @@ export default class App extends Component {
 			})
 	}
 
+	// Create a user and update our currentUser state
 	createUser(username) {
 		fetch('http://localhost:3001/users', {
       method: 'POST',
@@ -101,7 +101,9 @@ export default class App extends Component {
 
 		if (!this.state.currentUsername) {
 			this.createUser(this.state.tempUsername)
-		} else {
+		}
+		else if (!this.state.messageToSend) { return } 
+		else {
 			this.state.currentUser.sendMessage({
 			  text: this.state.messageToSend,
 			  roomId: this.state.room.id
