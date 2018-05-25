@@ -2,6 +2,23 @@ import React, { Component } from 'react'
 import { ChatManager, TokenProvider } from '@pusher/chatkit'
 import { ChatFeed, Message } from 'react-chat-ui'
 
+const styles = {
+  chatInput: {
+    flex: 1,
+  },
+  inputStyle: {
+    border: 'none',
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: '#ddd',
+    fontSize: 16,
+    outline: 'none',
+    paddingTop: 20,
+    paddingBottom: 20,
+    width: '100%',
+  },
+}
+
 export default class App extends Component {
   constructor(props) {
     super(props)
@@ -127,9 +144,11 @@ export default class App extends Component {
           hasInputField={false} // Boolean: use our input, or use your own
           showSenderName // show the name of the user who sent the message
           bubblesCentered={false} //Boolean should the bubbles be centered in the feed?
+          maxHeight={500}
         />
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleSubmit} style={styles.chatInput}>
           <input
+            style={styles.inputStyle}
             type="text"
             name={`${
               this.state.currentUsername ? 'message' : 'currentUsername'
